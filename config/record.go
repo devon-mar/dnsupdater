@@ -11,8 +11,7 @@ import (
 
 type Record struct {
 	Name  string
-	A     []netip.Addr `yaml:"a"`
-	AAAA  []netip.Addr `yaml:"aaaa"`
+	Host  []netip.Addr `yaml:"host"`
 	TXT   [][]string   `yaml:"txt"`
 	CNAME string       `yaml:"cname"`
 	TTL   uint32       `yaml:"ttl"`
@@ -24,15 +23,9 @@ func (r *Record) Validate() error {
 	}
 
 	var typeCount int
-	if len(r.A) > 0 {
+	if len(r.Host) > 0 {
 		typeCount++
-		if err := r.validateA(); err != nil {
-			return err
-		}
-	}
-	if len(r.AAAA) > 0 {
-		typeCount++
-		if err := r.validateAAAA(); err != nil {
+		if err := r.validateHost(); err != nil {
 			return err
 		}
 	}
@@ -64,19 +57,11 @@ func (r *Record) validateTXT() error {
 	return nil
 }
 
-func (r *Record) validateAAAA() error {
-	for _, ip := range r.AAAA {
-		if !ip.Is6() {
-			return fmt.Errorf(`%s: "%q" is not a IPv6 address`, r.Name, r.A)
-		}
-	}
-	return nil
-}
-
-func (r *Record) validateA() error {
-	for _, ip := range r.A {
-		if !ip.Is4() {
-			return fmt.Errorf(`%s: "%q" is not a IPv4 address`, r.Name, r.A)
+func (r *Record) validateHost() error {
+	for _, ip := range r.Host {
+		if !ip.Is4() && !ip.Is6() {
+			// This should probably never happen.
+			return fmt.Errorf("cannot determine record type for host %q", ip)
 		}
 	}
 	return nil
@@ -91,28 +76,24 @@ func (r *Record) header(fqdn string, rrtype uint16) dns.RR_Header {
 	}
 }
 
-func (r *Record) a(fqdn string) []dns.RR {
-	ret := make([]dns.RR, 0, len(r.A))
-	for _, ip := range r.A {
-		ret = append(ret,
-			&dns.A{
-				Hdr: r.header(fqdn, dns.TypeA),
-				A:   net.IP(ip.AsSlice()).To4(),
-			},
-		)
-	}
-	return ret
-}
-
-func (r *Record) aaaa(fqdn string) []dns.RR {
-	ret := make([]dns.RR, 0, len(r.AAAA))
-	for _, ip := range r.AAAA {
-		ret = append(ret,
-			&dns.AAAA{
-				Hdr:  r.header(fqdn, dns.TypeAAAA),
-				AAAA: net.IP(ip.AsSlice()).To16(),
-			},
-		)
+func (r *Record) host(fqdn string) []dns.RR {
+	ret := make([]dns.RR, 0, len(r.Host))
+	for _, ip := range r.Host {
+		if ip.Is4() {
+			ret = append(ret,
+				&dns.A{
+					Hdr: r.header(fqdn, dns.TypeA),
+					A:   net.IP(ip.AsSlice()).To4(),
+				},
+			)
+		} else {
+			ret = append(ret,
+				&dns.AAAA{
+					Hdr:  r.header(fqdn, dns.TypeAAAA),
+					AAAA: net.IP(ip.AsSlice()).To16(),
+				},
+			)
+		}
 	}
 	return ret
 }
@@ -144,8 +125,7 @@ func (r *Record) Records(zone string) []dns.RR {
 	ret := []dns.RR{}
 
 	fqdn := dns.Fqdn(r.Name + "." + zone)
-	ret = append(ret, r.a(fqdn)...)
-	ret = append(ret, r.aaaa(fqdn)...)
+	ret = append(ret, r.host(fqdn)...)
 	ret = append(ret, r.txt(fqdn)...)
 	if cname := r.cname(fqdn); cname != nil {
 		ret = append(ret, cname)

@@ -101,8 +101,8 @@ func mustParseIPs(ips ...string) []netip.Addr {
 	return ret
 }
 
-func testA(name string, ip string) dns.RR {
-	r := &config.Record{Name: name, A: []netip.Addr{netip.MustParseAddr(ip)}}
+func testHost(name string, ip string) dns.RR {
+	r := &config.Record{Name: name, Host: []netip.Addr{netip.MustParseAddr(ip)}}
 	return r.Records(testZone)[0]
 }
 
@@ -122,14 +122,14 @@ func TestInsert(t *testing.T) {
 					Records: map[string]*config.Record{
 						"www": {
 							Name: "www",
-							A:    mustParseIPs("192.0.2.1"),
+							Host: mustParseIPs("192.0.2.1"),
 						},
 					},
 				},
 			},
 			want: map[string][][]dns.RR{
 				"example.com.": {
-					{testA("www", "192.0.2.1")},
+					{testHost("www", "192.0.2.1")},
 				},
 			},
 		},
@@ -156,14 +156,14 @@ func TestInsertBatch(t *testing.T) {
 					Records: map[string]*config.Record{
 						"www": {
 							Name: "www",
-							A:    mustParseIPs("192.0.2.1"),
+							Host: mustParseIPs("192.0.2.1"),
 						},
 					},
 				},
 			},
 			want: map[string][][]dns.RR{
 				"example.com.": {
-					{testA("www", "192.0.2.1")},
+					{testHost("www", "192.0.2.1")},
 				},
 			},
 		},
@@ -174,7 +174,7 @@ func TestInsertBatch(t *testing.T) {
 					Records: map[string]*config.Record{
 						"www": {
 							Name: "www",
-							A:    mustParseIPs("192.0.2.1", "192.0.2.2"),
+							Host: mustParseIPs("192.0.2.1", "192.0.2.2"),
 						},
 						"www2": {
 							Name:  "www2",
@@ -185,8 +185,8 @@ func TestInsertBatch(t *testing.T) {
 			},
 			want: map[string][][]dns.RR{
 				"example.com.": {
-					{testA("www", "192.0.2.1")},
-					{testA("www", "192.0.2.2")},
+					{testHost("www", "192.0.2.1")},
+					{testHost("www", "192.0.2.2")},
 					{testCNAME("www2", "www.example.com.")},
 				},
 			},
@@ -198,7 +198,7 @@ func TestInsertBatch(t *testing.T) {
 					Records: map[string]*config.Record{
 						"www": {
 							Name: "www",
-							A:    mustParseIPs("192.0.2.1", "192.0.2.2"),
+							Host: mustParseIPs("192.0.2.1", "192.0.2.2"),
 						},
 						"www2": {
 							Name:  "www2",
@@ -209,7 +209,7 @@ func TestInsertBatch(t *testing.T) {
 			},
 			want: map[string][][]dns.RR{
 				"example.com.": {
-					{testA("www", "192.0.2.1"), testA("www", "192.0.2.2")},
+					{testHost("www", "192.0.2.1"), testHost("www", "192.0.2.2")},
 					{testCNAME("www2", "www.example.com.")},
 				},
 			},
@@ -234,7 +234,7 @@ func TestInsertBatch2(t *testing.T) {
 				},
 				"b": {
 					Name: "b",
-					A:    mustParseIPs("192.0.2.1"),
+					Host: mustParseIPs("192.0.2.1"),
 				},
 				"c": {
 					Name:  "c",
@@ -242,11 +242,11 @@ func TestInsertBatch2(t *testing.T) {
 				},
 				"d": {
 					Name: "d",
-					A:    mustParseIPs("192.0.2.1", "192.0.2.2"),
+					Host: mustParseIPs("192.0.2.1", "192.0.2.2"),
 				},
 				"e": {
 					Name: "e",
-					A:    mustParseIPs("192.0.2.1", "192.0.2.2", "192.0.2.3"),
+					Host: mustParseIPs("192.0.2.1", "192.0.2.2", "192.0.2.3"),
 				},
 				// yes, this is not valid.
 				"f": {
@@ -254,24 +254,24 @@ func TestInsertBatch2(t *testing.T) {
 				},
 				"g": {
 					Name: "g",
-					A:    mustParseIPs("192.0.2.1", "192.0.2.2", "192.0.2.3", "192.0.2.4"),
+					Host: mustParseIPs("192.0.2.1", "192.0.2.2", "192.0.2.3", "192.0.2.4"),
 				},
 			},
 		},
 	}
 
 	wantRecords := []dns.RR{
-		testA("b", "192.0.2.1"),
+		testHost("b", "192.0.2.1"),
 		testCNAME("c", "www.example.com."),
-		testA("d", "192.0.2.1"),
-		testA("d", "192.0.2.2"),
-		testA("e", "192.0.2.1"),
-		testA("e", "192.0.2.2"),
-		testA("e", "192.0.2.3"),
-		testA("g", "192.0.2.1"),
-		testA("g", "192.0.2.2"),
-		testA("g", "192.0.2.3"),
-		testA("g", "192.0.2.4"),
+		testHost("d", "192.0.2.1"),
+		testHost("d", "192.0.2.2"),
+		testHost("e", "192.0.2.1"),
+		testHost("e", "192.0.2.2"),
+		testHost("e", "192.0.2.3"),
+		testHost("g", "192.0.2.1"),
+		testHost("g", "192.0.2.2"),
+		testHost("g", "192.0.2.3"),
+		testHost("g", "192.0.2.4"),
 	}
 
 	// There are 11 records

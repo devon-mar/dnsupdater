@@ -10,15 +10,13 @@ zones:
     ttl: 3600
     records:
       test:
-        a:
+        host:
           - 192.0.2.1
-        aaaa:
           - 2001:db8::1
       test2:
-        a:
+        host:
           - 192.0.2.2
           - 192.0.2.3
-        aaaa:
           - 2001:db8::2
           - 2001:db8::3
       test3:

@@ -44,7 +44,7 @@ func main() {
 
 	switch cmd {
 	case checkCmd.FullCommand():
-		// We've already read in and verified the config. Nothing to do.
+		log.Infof("Config is valid.")
 		break
 	case insertCmd.FullCommand():
 		if *batchSize != 0 {

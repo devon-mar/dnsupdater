@@ -21,7 +21,7 @@ func TestRecords(t *testing.T) {
 		want []dns.RR
 	}{
 		"A": {
-			r: &Record{Name: "a", A: []netip.Addr{netip.MustParseAddr("192.0.2.1")}, TTL: 300},
+			r: &Record{Name: "a", Host: []netip.Addr{netip.MustParseAddr("192.0.2.1")}, TTL: 300},
 			want: []dns.RR{
 				&dns.A{
 					Hdr: dns.RR_Header{Name: "a." + testZone, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 300},
@@ -29,46 +29,40 @@ func TestRecords(t *testing.T) {
 				},
 			},
 		},
-		"A multiple": {
+		"host multiple": {
 			r: &Record{
-				Name: "a",
-				A:    []netip.Addr{netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("192.0.2.2")},
-				TTL:  300,
+				Name: "host",
+				Host: []netip.Addr{
+					netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("192.0.2.2"),
+					netip.MustParseAddr("2001:db8::1"), netip.MustParseAddr("2001:db8::2"),
+				},
+				TTL: 300,
 			},
 			want: []dns.RR{
 				&dns.A{
-					Hdr: dns.RR_Header{Name: "a." + testZone, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 300},
+					Hdr: dns.RR_Header{Name: "host." + testZone, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 300},
 					A:   net.IPv4(192, 0, 2, 1).To4(),
 				},
 				&dns.A{
-					Hdr: dns.RR_Header{Name: "a." + testZone, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 300},
+					Hdr: dns.RR_Header{Name: "host." + testZone, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 300},
 					A:   net.IPv4(192, 0, 2, 2).To4(),
+				},
+				&dns.AAAA{
+					Hdr:  dns.RR_Header{Name: "host." + testZone, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 300},
+					AAAA: net.ParseIP("2001:db8::1"),
+				},
+				&dns.AAAA{
+					Hdr:  dns.RR_Header{Name: "host." + testZone, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 300},
+					AAAA: net.ParseIP("2001:db8::2"),
 				},
 			},
 		},
 		"AAAA": {
-			r: &Record{Name: "aaaa", AAAA: []netip.Addr{netip.MustParseAddr("2001:db8::1")}, TTL: 300},
+			r: &Record{Name: "aaaa", Host: []netip.Addr{netip.MustParseAddr("2001:db8::1")}, TTL: 300},
 			want: []dns.RR{
 				&dns.AAAA{
 					Hdr:  dns.RR_Header{Name: "aaaa." + testZone, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 300},
 					AAAA: net.ParseIP("2001:db8::1"),
-				},
-			},
-		},
-		"AAAA multiple": {
-			r: &Record{
-				Name: "aaaa",
-				AAAA: []netip.Addr{netip.MustParseAddr("2001:db8::1"), netip.MustParseAddr("2001:db8::2")},
-				TTL:  300,
-			},
-			want: []dns.RR{
-				&dns.AAAA{
-					Hdr:  dns.RR_Header{Name: "aaaa." + testZone, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 300},
-					AAAA: net.ParseIP("2001:db8::1"),
-				},
-				&dns.AAAA{
-					Hdr:  dns.RR_Header{Name: "aaaa." + testZone, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 300},
-					AAAA: net.ParseIP("2001:db8::2"),
 				},
 			},
 		},
@@ -122,24 +116,9 @@ func TestRecordValidate(t *testing.T) {
 		"all except cname valid": {
 			r: &Record{
 				Name: "test",
-				A:    []netip.Addr{netip.MustParseAddr("192.0.2.1")},
-				AAAA: []netip.Addr{netip.MustParseAddr("2001:db8::1")},
+				Host: []netip.Addr{netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("2001:db8::1")},
 				TXT:  [][]string{{"abc"}},
 			},
-		},
-		"invalid A": {
-			r: &Record{
-				Name: "test",
-				A:    []netip.Addr{netip.MustParseAddr("2001:db8::1")},
-			},
-			wantInvalid: true,
-		},
-		"invalid AAAA": {
-			r: &Record{
-				Name: "test",
-				AAAA: []netip.Addr{netip.MustParseAddr("192.0.2.1")},
-			},
-			wantInvalid: true,
 		},
 		"empty txt": {
 			r: &Record{
@@ -158,19 +137,11 @@ func TestRecordValidate(t *testing.T) {
 				CNAME: "test2.example.com",
 			},
 		},
-		"CNAME and A": {
+		"CNAME and host": {
 			r: &Record{
 				Name:  "test",
 				CNAME: "test2.example.com",
-				A:     []netip.Addr{netip.MustParseAddr("192.0.2.1")},
-			},
-			wantInvalid: true,
-		},
-		"CNAME and AAAA": {
-			r: &Record{
-				Name:  "test",
-				CNAME: "test2.example.com",
-				AAAA:  []netip.Addr{netip.MustParseAddr("2001:db8::1")},
+				Host:  []netip.Addr{netip.MustParseAddr("192.0.2.1")},
 			},
 			wantInvalid: true,
 		},
