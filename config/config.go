@@ -41,6 +41,9 @@ func (z *Zone) init() {
 }
 
 func (z *Zone) Validate() error {
+	if len(z.Records) == 0 {
+		return errors.New("zone has no records")
+	}
 	for _, r := range z.Records {
 		if err := r.Validate(); err != nil {
 			return err

@@ -60,6 +60,7 @@ func TestReadConfig(t *testing.T) {
 		"no_zones":        {wantErr: true},
 		"no_servers":      {wantErr: true},
 		"invalid_record":  {wantErr: true},
+		"zone_no_records": {wantErr: true},
 	}
 	for file, tc := range tests {
 		t.Run(file, func(t *testing.T) {

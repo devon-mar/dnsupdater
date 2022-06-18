@@ -1,0 +1,6 @@
+---
+servers:
+  - ns.example.com
+zones:
+  example.com:
+    ttl: 3600
