@@ -81,6 +81,28 @@ func TestRecords(t *testing.T) {
 				},
 			},
 		},
+		"TXT": {
+			r: &Record{Name: "txt", TXT: [][]string{{"123"}}},
+			want: []dns.RR{
+				&dns.TXT{
+					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
+					Txt: []string{"123"},
+				},
+			},
+		},
+		"TXT multiple": {
+			r: &Record{Name: "txt", TXT: [][]string{{"123", "456"}, {"abc", "def"}}},
+			want: []dns.RR{
+				&dns.TXT{
+					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
+					Txt: []string{"123", "456"},
+				},
+				&dns.TXT{
+					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
+					Txt: []string{"abc", "def"},
+				},
+			},
+		},
 	}
 
 	for name, tc := range tests {
@@ -102,6 +124,7 @@ func TestRecordValidate(t *testing.T) {
 				Name: "test",
 				A:    []netip.Addr{netip.MustParseAddr("192.0.2.1")},
 				AAAA: []netip.Addr{netip.MustParseAddr("2001:db8::1")},
+				TXT:  [][]string{{"abc"}},
 			},
 		},
 		"invalid A": {
@@ -115,6 +138,17 @@ func TestRecordValidate(t *testing.T) {
 			r: &Record{
 				Name: "test",
 				AAAA: []netip.Addr{netip.MustParseAddr("192.0.2.1")},
+			},
+			wantInvalid: true,
+		},
+		"empty txt": {
+			r: &Record{
+				Name: "test",
+				TXT: [][]string{
+					{"abc", "def"},
+					{},
+					{"ghi", "jkl"},
+				},
 			},
 			wantInvalid: true,
 		},
