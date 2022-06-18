@@ -45,7 +45,6 @@ func main() {
 	switch cmd {
 	case checkCmd.FullCommand():
 		log.Infof("Config is valid.")
-		break
 	case insertCmd.FullCommand():
 		if *batchSize != 0 {
 			insertBatch(u, c.Zones, *batchSize)
