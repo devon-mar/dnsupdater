@@ -27,6 +27,7 @@ WANT_RECORDS = [
     "test2 3600 IN AAAA 2001:db8::2",
     "test2 3600 IN AAAA 2001:db8::3",
     "test3 7200 IN CNAME test",
+    'test4 3600 IN TXT "abcdef"'
 ]
 
 
