@@ -44,6 +44,10 @@ jobs:
           python-version: 3.x
           architecture: x64
 
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.18.0"
+
       - name: Install Python requirements
         run: pip install -r integration_test/requirements.txt
 
