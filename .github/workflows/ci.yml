@@ -59,6 +59,8 @@ jobs:
           COMPOSE_DOCKER_CLI_BUILD: "1"
           DOCKER_BUILDKIT: "1"
 
+      - run: go build
+
       - name: Run integration tests
         run: pytest -v integration_test
         env:
