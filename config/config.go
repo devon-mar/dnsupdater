@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"io"
 	"os"
 	"strings"
 
@@ -54,14 +55,21 @@ func (z *Zone) Validate() error {
 
 // Read the config from the file, overriding with env variables, and filling defaults.
 func ReadConfig(path string) (*Config, error) {
-	raw, err := os.ReadFile(path)
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
+
+	d := yaml.NewDecoder(f)
+	d.KnownFields(true)
+
 	c := &Config{}
-	if err := yaml.Unmarshal(raw, c); err != nil {
+	// https: //github.com/go-yaml/yaml/issues/639#issuecomment-666935833
+	if err := d.Decode(c); err != nil && err != io.EOF {
 		return nil, err
 	}
+
 	c.loadEnv()
 	c.init()
 	if err := c.Validate(); err != nil {

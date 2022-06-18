@@ -1,0 +1,11 @@
+---
+servers:
+  - ns.example.com
+
+extra_key: {}
+
+zones:
+  example.com:
+    records:
+      test:
+        cname: a
