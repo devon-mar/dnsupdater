@@ -1,0 +1,8 @@
+---
+servers:
+  - ns.example.com
+zones:
+  example.com:
+    records:
+      test:
+        cname: a

@@ -1,0 +1,9 @@
+---
+linters:
+  enable:
+    # https://github.com/golangci/golangci-lint/issues/2711
+    # - gofumpt
+    - misspell
+    - bodyclose
+    - forbidigo
+    - exportloopref

@@ -1,0 +1,26 @@
+---
+version: "3.9"
+services:
+  kdc:
+    build: .
+    tmpfs:
+      - /tmp
+    command:
+      - krb5kdc
+      - -n
+    hostname: kdc.example.com
+    ports:
+      - 88:88/udp
+      - 88:88/tcp
+  bind:
+    build: .
+    command: sh -c 'named -g -d 6 -c /etc/bind/named.conf'
+    tmpfs:
+      - /etc/bind/master
+    volumes:
+      - ./named.conf:/etc/bind/named.conf:ro
+      - ./example.com.zone:/etc/bind/master/example.com.zone:ro
+    ports:
+      - 1053:53/udp
+      - 1053:53/tcp
+    hostname: ns.example.com

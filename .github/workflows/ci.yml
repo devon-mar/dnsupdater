@@ -1,0 +1,65 @@
+---
+name: CI
+
+"on":
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.18.0"
+
+      - run: go vet ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.18.0"
+
+      - name: Run go tests
+        run: go test -v ./...
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.x
+          architecture: x64
+
+      - name: Install Python requirements
+        run: pip install -r integration_test/requirements.txt
+
+      - name: Edit /etc/hosts
+        run: |
+          echo "127.0.0.1 ns.example.com kdc.example.com" | sudo tee -a /etc/hosts
+
+      - name: Build and start containers
+        run: docker-compose up -d
+        working-directory: ./integration_test
+        env:
+          # Use buildx
+          COMPOSE_DOCKER_CLI_BUILD: "1"
+          DOCKER_BUILDKIT: "1"
+
+      - name: Run integration tests
+        run: pytest -v integration_test
+        env:
+          PY_COLORS: "1"
