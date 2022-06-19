@@ -122,6 +122,40 @@ func TestRecords(t *testing.T) {
 				},
 			},
 		},
+		"SRV": {
+			r: &Record{Name: "srv", SRV: []SRVRecord{{Priority: 10, Weight: 15, Port: 80, Target: "www.example.net"}}},
+			want: []dns.RR{
+				&dns.SRV{
+					Hdr:      dns.RR_Header{Name: "srv." + testZone, Rrtype: dns.TypeSRV, Class: dns.ClassINET},
+					Priority: 10,
+					Weight:   15,
+					Port:     80,
+					Target:   "www.example.net.",
+				},
+			},
+		},
+		"SRV multiple": {
+			r: &Record{Name: "srv", SRV: []SRVRecord{
+				{Priority: 10, Weight: 15, Port: 80, Target: "www.example.net"},
+				{Priority: 20, Weight: 15, Port: 80, Target: "www2.example.net"},
+			}},
+			want: []dns.RR{
+				&dns.SRV{
+					Hdr:      dns.RR_Header{Name: "srv." + testZone, Rrtype: dns.TypeSRV, Class: dns.ClassINET},
+					Priority: 10,
+					Weight:   15,
+					Port:     80,
+					Target:   "www.example.net.",
+				},
+				&dns.SRV{
+					Hdr:      dns.RR_Header{Name: "srv." + testZone, Rrtype: dns.TypeSRV, Class: dns.ClassINET},
+					Priority: 20,
+					Weight:   15,
+					Port:     80,
+					Target:   "www2.example.net.",
+				},
+			},
+		},
 	}
 
 	for name, tc := range tests {

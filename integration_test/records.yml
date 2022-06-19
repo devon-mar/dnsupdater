@@ -31,3 +31,9 @@ zones:
             preference: 10
           - mx: mx2.example.net
             preference: 15
+      test6:
+        srv:
+          - target: www.example.net
+            priority: 10
+            weight: 20
+            port: 80

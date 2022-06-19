@@ -18,3 +18,8 @@ zones:
             preference: 10
           - mx: mx2.example.com
             preference: 15
+        srv:
+          - target: www.example.com
+            port: 80
+            priority: 1
+            weight: 10

@@ -14,6 +14,7 @@ type Record struct {
 	Host  []netip.Addr `yaml:"host"`
 	TXT   [][]string   `yaml:"txt"`
 	MX    []MXRecord   `yaml:"mx"`
+	SRV   []SRVRecord  `yaml:"srv"`
 	CNAME string       `yaml:"cname"`
 	TTL   uint32       `yaml:"ttl"`
 }
@@ -21,6 +22,13 @@ type Record struct {
 type MXRecord struct {
 	Preference uint16 `yaml:"preference"`
 	MX         string `yaml:"mx"`
+}
+
+type SRVRecord struct {
+	Priority uint16 `yaml:"priority"`
+	Weight   uint16 `yaml:"weight"`
+	Port     uint16 `yaml:"port"`
+	Target   string `yaml:"target"`
 }
 
 func (r *Record) Validate() error {
@@ -44,6 +52,12 @@ func (r *Record) Validate() error {
 	if len(r.MX) > 0 {
 		typeCount++
 		if err := r.validateMX(); err != nil {
+			return err
+		}
+	}
+	if len(r.SRV) > 0 {
+		typeCount++
+		if err := r.validateSRV(); err != nil {
 			return err
 		}
 	}
@@ -91,6 +105,22 @@ func (r *Record) validateMX() error {
 func (mx *MXRecord) validate() error {
 	if mx.MX == "" {
 		return errors.New("MX record must have a MX")
+	}
+	return nil
+}
+
+func (r *Record) validateSRV() error {
+	for _, srv := range r.SRV {
+		if err := srv.validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *SRVRecord) validate() error {
+	if s.Target == "" {
+		return errors.New("SRV record must have a target")
 	}
 	return nil
 }
@@ -163,6 +193,22 @@ func (r *Record) mx(fqdn string) []dns.RR {
 	return ret
 }
 
+func (r *Record) srv(fqdn string) []dns.RR {
+	ret := make([]dns.RR, 0, len(r.SRV))
+	for _, srv := range r.SRV {
+		ret = append(ret,
+			&dns.SRV{
+				Hdr:      r.header(fqdn, dns.TypeSRV),
+				Priority: srv.Priority,
+				Weight:   srv.Weight,
+				Port:     srv.Port,
+				Target:   dns.Fqdn(srv.Target),
+			},
+		)
+	}
+	return ret
+}
+
 func (r *Record) Records(zone string) []dns.RR {
 	ret := []dns.RR{}
 
@@ -170,6 +216,7 @@ func (r *Record) Records(zone string) []dns.RR {
 	ret = append(ret, r.host(fqdn)...)
 	ret = append(ret, r.txt(fqdn)...)
 	ret = append(ret, r.mx(fqdn)...)
+	ret = append(ret, r.srv(fqdn)...)
 	if cname := r.cname(fqdn); cname != nil {
 		ret = append(ret, cname)
 	}
