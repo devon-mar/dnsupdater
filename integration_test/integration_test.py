@@ -20,7 +20,6 @@ IGNORE_NAMES = ("@", "ns")
 TEST_ZONE = "example.com"
 TEST_ZONE2 = "example.net"
 WANT_RECORDS = [
-    '@ 3600 IN TXT "v=spf1 ~all"',
     "test 3600 IN A 192.0.2.1",
     "test 3600 IN AAAA 2001:db8::1",
     "test2 3600 IN A 192.0.2.2",
