@@ -11,8 +11,6 @@ import (
 	"github.com/miekg/dns"
 )
 
-const testZone = "example.com"
-
 type testUpdater struct {
 	insertions map[string][][]dns.RR
 	allRecords []dns.RR
