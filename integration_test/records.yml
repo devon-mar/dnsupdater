@@ -11,7 +11,7 @@ zones:
     records:
       "":
         txt:
-          - ["v=spf1 ~all"]
+          - "v=spf1 ~all"
       test:
         host:
           - 192.0.2.1
@@ -27,7 +27,7 @@ zones:
         cname: test.example.com
       test4:
         txt:
-          - ["abcdef"]
+          - "abcdef"
       test5:
         mx:
           - mx: mx1.example.net

@@ -12,7 +12,7 @@ zones:
           - 192.0.2.1
           - 2001:db8::1
         txt:
-          - [abc]
+          - abc
         mx:
           - mx: mx1.example.com
             preference: 10

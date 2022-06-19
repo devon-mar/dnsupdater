@@ -5,14 +5,19 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
+	"strings"
 
 	"github.com/miekg/dns"
+)
+
+const (
+	txtMaxLength = 255
 )
 
 type Record struct {
 	FQDN  string
 	Host  []netip.Addr `yaml:"host"`
-	TXT   [][]string   `yaml:"txt"`
+	TXT   []string     `yaml:"txt"`
 	MX    []MXRecord   `yaml:"mx"`
 	SRV   []SRVRecord  `yaml:"srv"`
 	CNAME string       `yaml:"cname"`
@@ -158,7 +163,7 @@ func (r *Record) txt() []dns.RR {
 		ret = append(ret,
 			&dns.TXT{
 				Hdr: r.header(dns.TypeTXT),
-				Txt: txt,
+				Txt: splitString(txt, txtMaxLength),
 			},
 		)
 	}
@@ -214,6 +219,28 @@ func (r *Record) Records() []dns.RR {
 	ret = append(ret, r.srv()...)
 	if cname := r.cname(); cname != nil {
 		ret = append(ret, cname)
+	}
+	return ret
+}
+
+func splitString(s string, max int) []string {
+	slc := strings.Split(s, "")
+	if len(slc) <= max {
+		return []string{s}
+	}
+	l := len(slc) / max
+	if len(slc)%max != 0 {
+		l++
+	}
+	ret := make([]string, l)
+
+	iter := len(slc) / max
+	for i := 0; i < iter; i++ {
+		ret[i] = strings.Join(slc[:max], "")
+		slc = slc[max:]
+	}
+	if len(slc) > 0 {
+		ret[len(ret)-1] = strings.Join(slc, "")
 	}
 	return ret
 }

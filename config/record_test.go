@@ -4,6 +4,7 @@ import (
 	"net"
 	"net/netip"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/miekg/dns"
@@ -101,7 +102,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"TXT": {
-			r: &Record{FQDN: "txt." + testZone, TXT: [][]string{{"123"}}},
+			r: &Record{FQDN: "txt." + testZone, TXT: []string{"123"}},
 			want: []dns.RR{
 				&dns.TXT{
 					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
@@ -110,15 +111,24 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"TXT multiple": {
-			r: &Record{FQDN: "txt." + testZone, TXT: [][]string{{"123", "456"}, {"abc", "def"}}},
+			r: &Record{FQDN: "txt." + testZone, TXT: []string{"123", "456"}},
 			want: []dns.RR{
 				&dns.TXT{
 					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
-					Txt: []string{"123", "456"},
+					Txt: []string{"123"},
 				},
 				&dns.TXT{
 					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
-					Txt: []string{"abc", "def"},
+					Txt: []string{"456"},
+				},
+			},
+		},
+		"TXT long": {
+			r: &Record{FQDN: "txt." + testZone, TXT: []string{strings.Repeat("a", 300)}},
+			want: []dns.RR{
+				&dns.TXT{
+					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
+					Txt: []string{strings.Repeat("a", 255), strings.Repeat("a", 45)},
 				},
 			},
 		},
@@ -162,6 +172,41 @@ func TestRecords(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			if have := tc.r.Records(); !reflect.DeepEqual(have, tc.want) {
 				t.Errorf("got %+v, want %+v", have, tc.want)
+			}
+		})
+	}
+}
+
+func TestSplitString(t *testing.T) {
+	alphabet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	tests := map[string]struct {
+		strLen int
+		max    int
+		want   []string
+	}{
+		"max 1":        {strLen: 4, max: 1},
+		"limit=strlen": {strLen: 10, max: 10},
+		"remainder":    {strLen: 15, max: 4},
+		"long":         {strLen: 578, max: 255},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var input string
+			for len(input) < tc.strLen {
+				input += alphabet
+			}
+			input = input[:tc.strLen]
+
+			have := splitString(input, tc.max)
+			for i, s := range have {
+				if i == len(have)-1 && len(s) > tc.max {
+					t.Errorf("%d: expected len less than %d but got %d: %s", i, tc.max, len(s), s)
+				} else if i != len(have)-1 && len(s) != tc.max {
+					t.Errorf("%d: expected len %d but got %d: %s", i, tc.max, len(s), s)
+				}
+				if j := strings.Join(have, ""); j != input {
+					t.Errorf("expected joined string %q, but got %q", input, j)
+				}
 			}
 		})
 	}

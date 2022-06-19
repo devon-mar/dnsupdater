@@ -37,7 +37,7 @@ func TestReadConfig(t *testing.T) {
 								FQDN: "test2.example.com.",
 								TTL:  10,
 								Host: []netip.Addr{netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("2001:db8::1")},
-								TXT:  [][]string{{"abc"}},
+								TXT:  []string{"abc"},
 								MX:   []MXRecord{{MX: "mx1.example.com", Preference: 10}, {MX: "mx2.example.com", Preference: 15}},
 								SRV:  []SRVRecord{{Target: "www.example.com", Port: 80, Priority: 1, Weight: 10}},
 							},
