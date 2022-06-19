@@ -86,6 +86,8 @@ func TestReadConfig(t *testing.T) {
 		"extra_key":       {wantErr: true},
 		"mx_invalid":      {wantErr: true},
 		"srv_invalid":     {wantErr: true},
+		"txt_empty_slice": {wantErr: true},
+		"cname_and_host":  {wantErr: true},
 	}
 	for file, tc := range tests {
 		t.Run(file, func(t *testing.T) {

@@ -32,10 +32,6 @@ type SRVRecord struct {
 }
 
 func (r *Record) Validate() error {
-	if r.Name == "" {
-		return errors.New("record name is empty")
-	}
-
 	var typeCount int
 	if len(r.Host) > 0 {
 		typeCount++
