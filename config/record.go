@@ -10,7 +10,7 @@ import (
 )
 
 type Record struct {
-	Name  string
+	FQDN  string
 	Host  []netip.Addr `yaml:"host"`
 	TXT   [][]string   `yaml:"txt"`
 	MX    []MXRecord   `yaml:"mx"`
@@ -121,29 +121,29 @@ func (s *SRVRecord) validate() error {
 	return nil
 }
 
-func (r *Record) header(fqdn string, rrtype uint16) dns.RR_Header {
+func (r *Record) header(rrtype uint16) dns.RR_Header {
 	return dns.RR_Header{
-		Name:   fqdn,
+		Name:   r.FQDN,
 		Rrtype: rrtype,
 		Class:  dns.ClassINET,
 		Ttl:    r.TTL,
 	}
 }
 
-func (r *Record) host(fqdn string) []dns.RR {
+func (r *Record) host() []dns.RR {
 	ret := make([]dns.RR, 0, len(r.Host))
 	for _, ip := range r.Host {
 		if ip.Is4() {
 			ret = append(ret,
 				&dns.A{
-					Hdr: r.header(fqdn, dns.TypeA),
+					Hdr: r.header(dns.TypeA),
 					A:   net.IP(ip.AsSlice()).To4(),
 				},
 			)
 		} else {
 			ret = append(ret,
 				&dns.AAAA{
-					Hdr:  r.header(fqdn, dns.TypeAAAA),
+					Hdr:  r.header(dns.TypeAAAA),
 					AAAA: net.IP(ip.AsSlice()).To16(),
 				},
 			)
@@ -152,12 +152,12 @@ func (r *Record) host(fqdn string) []dns.RR {
 	return ret
 }
 
-func (r *Record) txt(fqdn string) []dns.RR {
+func (r *Record) txt() []dns.RR {
 	ret := make([]dns.RR, 0, len(r.TXT))
 	for _, txt := range r.TXT {
 		ret = append(ret,
 			&dns.TXT{
-				Hdr: r.header(fqdn, dns.TypeTXT),
+				Hdr: r.header(dns.TypeTXT),
 				Txt: txt,
 			},
 		)
@@ -165,22 +165,22 @@ func (r *Record) txt(fqdn string) []dns.RR {
 	return ret
 }
 
-func (r *Record) cname(fqdn string) *dns.CNAME {
+func (r *Record) cname() *dns.CNAME {
 	if r.CNAME == "" {
 		return nil
 	}
 	return &dns.CNAME{
-		Hdr:    r.header(fqdn, dns.TypeCNAME),
+		Hdr:    r.header(dns.TypeCNAME),
 		Target: dns.Fqdn(r.CNAME),
 	}
 }
 
-func (r *Record) mx(fqdn string) []dns.RR {
+func (r *Record) mx() []dns.RR {
 	ret := make([]dns.RR, 0, len(r.MX))
 	for _, mx := range r.MX {
 		ret = append(ret,
 			&dns.MX{
-				Hdr:        r.header(fqdn, dns.TypeMX),
+				Hdr:        r.header(dns.TypeMX),
 				Preference: mx.Preference,
 				Mx:         dns.Fqdn(mx.MX),
 			},
@@ -189,12 +189,12 @@ func (r *Record) mx(fqdn string) []dns.RR {
 	return ret
 }
 
-func (r *Record) srv(fqdn string) []dns.RR {
+func (r *Record) srv() []dns.RR {
 	ret := make([]dns.RR, 0, len(r.SRV))
 	for _, srv := range r.SRV {
 		ret = append(ret,
 			&dns.SRV{
-				Hdr:      r.header(fqdn, dns.TypeSRV),
+				Hdr:      r.header(dns.TypeSRV),
 				Priority: srv.Priority,
 				Weight:   srv.Weight,
 				Port:     srv.Port,
@@ -205,15 +205,14 @@ func (r *Record) srv(fqdn string) []dns.RR {
 	return ret
 }
 
-func (r *Record) Records(zone string) []dns.RR {
+func (r *Record) Records() []dns.RR {
 	ret := []dns.RR{}
 
-	fqdn := dns.Fqdn(r.Name + "." + zone)
-	ret = append(ret, r.host(fqdn)...)
-	ret = append(ret, r.txt(fqdn)...)
-	ret = append(ret, r.mx(fqdn)...)
-	ret = append(ret, r.srv(fqdn)...)
-	if cname := r.cname(fqdn); cname != nil {
+	ret = append(ret, r.host()...)
+	ret = append(ret, r.txt()...)
+	ret = append(ret, r.mx()...)
+	ret = append(ret, r.srv()...)
+	if cname := r.cname(); cname != nil {
 		ret = append(ret, cname)
 	}
 	return ret

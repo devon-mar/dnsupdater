@@ -21,7 +21,7 @@ func TestRecords(t *testing.T) {
 		want []dns.RR
 	}{
 		"A": {
-			r: &Record{Name: "a", Host: []netip.Addr{netip.MustParseAddr("192.0.2.1")}, TTL: 300},
+			r: &Record{FQDN: "a." + testZone, Host: []netip.Addr{netip.MustParseAddr("192.0.2.1")}, TTL: 300},
 			want: []dns.RR{
 				&dns.A{
 					Hdr: dns.RR_Header{Name: "a." + testZone, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 300},
@@ -31,7 +31,7 @@ func TestRecords(t *testing.T) {
 		},
 		"host multiple": {
 			r: &Record{
-				Name: "host",
+				FQDN: "host." + testZone,
 				Host: []netip.Addr{
 					netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("192.0.2.2"),
 					netip.MustParseAddr("2001:db8::1"), netip.MustParseAddr("2001:db8::2"),
@@ -58,7 +58,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"AAAA": {
-			r: &Record{Name: "aaaa", Host: []netip.Addr{netip.MustParseAddr("2001:db8::1")}, TTL: 300},
+			r: &Record{FQDN: "aaaa." + testZone, Host: []netip.Addr{netip.MustParseAddr("2001:db8::1")}, TTL: 300},
 			want: []dns.RR{
 				&dns.AAAA{
 					Hdr:  dns.RR_Header{Name: "aaaa." + testZone, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 300},
@@ -67,7 +67,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"CNAME": {
-			r: &Record{Name: "cname", CNAME: "abc.example.com."},
+			r: &Record{FQDN: "cname." + testZone, CNAME: "abc.example.com."},
 			want: []dns.RR{
 				&dns.CNAME{
 					Hdr:    dns.RR_Header{Name: "cname." + testZone, Rrtype: dns.TypeCNAME, Class: dns.ClassINET},
@@ -76,7 +76,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"MX": {
-			r: &Record{Name: "mx", MX: []MXRecord{{Preference: 0, MX: "mail.example.com"}}},
+			r: &Record{FQDN: "mx." + testZone, MX: []MXRecord{{Preference: 0, MX: "mail.example.com"}}},
 			want: []dns.RR{
 				&dns.MX{
 					Hdr:        dns.RR_Header{Name: "mx." + testZone, Rrtype: dns.TypeMX, Class: dns.ClassINET},
@@ -86,7 +86,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"MX multiple": {
-			r: &Record{Name: "mail", MX: []MXRecord{{Preference: 0, MX: "mx1.example.com"}, {Preference: 10, MX: "mx2.example.com"}}},
+			r: &Record{FQDN: "mail." + testZone, MX: []MXRecord{{Preference: 0, MX: "mx1.example.com"}, {Preference: 10, MX: "mx2.example.com"}}},
 			want: []dns.RR{
 				&dns.MX{
 					Hdr:        dns.RR_Header{Name: "mail." + testZone, Rrtype: dns.TypeMX, Class: dns.ClassINET},
@@ -101,7 +101,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"TXT": {
-			r: &Record{Name: "txt", TXT: [][]string{{"123"}}},
+			r: &Record{FQDN: "txt." + testZone, TXT: [][]string{{"123"}}},
 			want: []dns.RR{
 				&dns.TXT{
 					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
@@ -110,7 +110,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"TXT multiple": {
-			r: &Record{Name: "txt", TXT: [][]string{{"123", "456"}, {"abc", "def"}}},
+			r: &Record{FQDN: "txt." + testZone, TXT: [][]string{{"123", "456"}, {"abc", "def"}}},
 			want: []dns.RR{
 				&dns.TXT{
 					Hdr: dns.RR_Header{Name: "txt." + testZone, Rrtype: dns.TypeTXT, Class: dns.ClassINET},
@@ -123,7 +123,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"SRV": {
-			r: &Record{Name: "srv", SRV: []SRVRecord{{Priority: 10, Weight: 15, Port: 80, Target: "www.example.net"}}},
+			r: &Record{FQDN: "srv." + testZone, SRV: []SRVRecord{{Priority: 10, Weight: 15, Port: 80, Target: "www.example.net"}}},
 			want: []dns.RR{
 				&dns.SRV{
 					Hdr:      dns.RR_Header{Name: "srv." + testZone, Rrtype: dns.TypeSRV, Class: dns.ClassINET},
@@ -135,7 +135,7 @@ func TestRecords(t *testing.T) {
 			},
 		},
 		"SRV multiple": {
-			r: &Record{Name: "srv", SRV: []SRVRecord{
+			r: &Record{FQDN: "srv." + testZone, SRV: []SRVRecord{
 				{Priority: 10, Weight: 15, Port: 80, Target: "www.example.net"},
 				{Priority: 20, Weight: 15, Port: 80, Target: "www2.example.net"},
 			}},
@@ -160,7 +160,7 @@ func TestRecords(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			if have := tc.r.Records(testZone); !reflect.DeepEqual(have, tc.want) {
+			if have := tc.r.Records(); !reflect.DeepEqual(have, tc.want) {
 				t.Errorf("got %+v, want %+v", have, tc.want)
 			}
 		})

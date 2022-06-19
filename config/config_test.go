@@ -20,7 +20,7 @@ func TestReadConfig(t *testing.T) {
 				Zones: map[string]*Zone{
 					"example.com": {
 						TTL:     defaultTTL,
-						Records: map[string]*Record{"test": {Name: "test", CNAME: "a", TTL: defaultTTL}},
+						Records: map[string]*Record{"test": {FQDN: "test.example.com.", CNAME: "a", TTL: defaultTTL}},
 					},
 				},
 			},
@@ -32,9 +32,9 @@ func TestReadConfig(t *testing.T) {
 					"example.com": {
 						TTL: 10,
 						Records: map[string]*Record{
-							"test": {Name: "test", CNAME: "a", TTL: 10},
+							"test": {FQDN: "test.example.com.", CNAME: "a", TTL: 10},
 							"test2": {
-								Name: "test2",
+								FQDN: "test2.example.com.",
 								TTL:  10,
 								Host: []netip.Addr{netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("2001:db8::1")},
 								TXT:  [][]string{{"abc"}},
@@ -52,7 +52,7 @@ func TestReadConfig(t *testing.T) {
 				Zones: map[string]*Zone{
 					"example.com": {
 						TTL:     defaultTTL,
-						Records: map[string]*Record{"test": {Name: "test", CNAME: "a", TTL: defaultTTL}},
+						Records: map[string]*Record{"test": {FQDN: "test.example.com.", CNAME: "a", TTL: defaultTTL}},
 					},
 				},
 				GSS: &GSSConfig{
@@ -68,7 +68,7 @@ func TestReadConfig(t *testing.T) {
 				Zones: map[string]*Zone{
 					"example.com": {
 						TTL:     defaultTTL,
-						Records: map[string]*Record{"test": {Name: "test", CNAME: "a", TTL: defaultTTL}},
+						Records: map[string]*Record{"test": {FQDN: "test.example.com.", CNAME: "a", TTL: defaultTTL}},
 					},
 				},
 				GSS: &GSSConfig{},

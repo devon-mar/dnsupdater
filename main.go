@@ -58,8 +58,8 @@ func insert(s updater.Updater, zones map[string]*config.Zone) {
 	for zoneName, zone := range zones {
 		log.Infof("Inserting records for zone %q", zoneName)
 		for _, r := range zone.Records {
-			logger := log.WithFields(log.Fields{"name": r.Name, "zone": zoneName})
-			insertRecords(s, zoneName, r.Records(zoneName), logger)
+			logger := log.WithFields(log.Fields{"fqdn": r.FQDN, "zone": zoneName})
+			insertRecords(s, zoneName, r.Records(), logger)
 		}
 	}
 }
@@ -70,7 +70,7 @@ func insertBatch(s updater.Updater, zones map[string]*config.Zone, batchSize int
 		logger.Infof("Insering records")
 		var queue []dns.RR
 		for _, r := range zone.Records {
-			queue = append(queue, r.Records(zoneName)...)
+			queue = append(queue, r.Records()...)
 
 			for len(queue) >= batchSize {
 				insertRecords(s, zoneName, queue[:batchSize], logger)

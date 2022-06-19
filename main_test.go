@@ -102,13 +102,13 @@ func mustParseIPs(ips ...string) []netip.Addr {
 }
 
 func testHost(name string, ip string) dns.RR {
-	r := &config.Record{Name: name, Host: []netip.Addr{netip.MustParseAddr(ip)}}
-	return r.Records(testZone)[0]
+	r := &config.Record{FQDN: name, Host: []netip.Addr{netip.MustParseAddr(ip)}}
+	return r.Records()[0]
 }
 
 func testCNAME(name string, target string) dns.RR {
-	r := &config.Record{Name: name, CNAME: target}
-	return r.Records(testZone)[0]
+	r := &config.Record{FQDN: name, CNAME: target}
+	return r.Records()[0]
 }
 
 func TestInsert(t *testing.T) {
@@ -121,7 +121,7 @@ func TestInsert(t *testing.T) {
 				"example.com": {
 					Records: map[string]*config.Record{
 						"www": {
-							Name: "www",
+							FQDN: "www",
 							Host: mustParseIPs("192.0.2.1"),
 						},
 					},
@@ -155,7 +155,7 @@ func TestInsertBatch(t *testing.T) {
 				"example.com": {
 					Records: map[string]*config.Record{
 						"www": {
-							Name: "www",
+							FQDN: "www",
 							Host: mustParseIPs("192.0.2.1"),
 						},
 					},
@@ -173,11 +173,11 @@ func TestInsertBatch(t *testing.T) {
 				"example.com": {
 					Records: map[string]*config.Record{
 						"www": {
-							Name: "www",
+							FQDN: "www",
 							Host: mustParseIPs("192.0.2.1", "192.0.2.2"),
 						},
 						"www2": {
-							Name:  "www2",
+							FQDN:  "www2",
 							CNAME: "www.example.com",
 						},
 					},
@@ -197,11 +197,11 @@ func TestInsertBatch(t *testing.T) {
 				"example.com": {
 					Records: map[string]*config.Record{
 						"www": {
-							Name: "www",
+							FQDN: "www",
 							Host: mustParseIPs("192.0.2.1", "192.0.2.2"),
 						},
 						"www2": {
-							Name:  "www2",
+							FQDN:  "www2",
 							CNAME: "www.example.com",
 						},
 					},
@@ -230,30 +230,30 @@ func TestInsertBatch2(t *testing.T) {
 			Records: map[string]*config.Record{
 				// yes, this is not valid.
 				"a": {
-					Name: "a",
+					FQDN: "a",
 				},
 				"b": {
-					Name: "b",
+					FQDN: "b",
 					Host: mustParseIPs("192.0.2.1"),
 				},
 				"c": {
-					Name:  "c",
+					FQDN:  "c",
 					CNAME: "www.example.com",
 				},
 				"d": {
-					Name: "d",
+					FQDN: "d",
 					Host: mustParseIPs("192.0.2.1", "192.0.2.2"),
 				},
 				"e": {
-					Name: "e",
+					FQDN: "e",
 					Host: mustParseIPs("192.0.2.1", "192.0.2.2", "192.0.2.3"),
 				},
 				// yes, this is not valid.
 				"f": {
-					Name: "f",
+					FQDN: "f",
 				},
 				"g": {
-					Name: "g",
+					FQDN: "g",
 					Host: mustParseIPs("192.0.2.1", "192.0.2.2", "192.0.2.3", "192.0.2.4"),
 				},
 			},

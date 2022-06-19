@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/miekg/dns"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,12 +30,13 @@ type Zone struct {
 	TTL     uint32             `yaml:"ttl"`
 }
 
-func (z *Zone) init() {
+// zoneName should be a FQDN.
+func (z *Zone) init(zoneName string) {
 	if z.TTL == 0 {
 		z.TTL = defaultTTL
 	}
 	for name, r := range z.Records {
-		r.Name = name
+		r.FQDN = name + "." + zoneName
 		if r.TTL == 0 {
 			r.TTL = z.TTL
 		}
@@ -79,8 +81,8 @@ func ReadConfig(path string) (*Config, error) {
 }
 
 func (c *Config) init() {
-	for _, z := range c.Zones {
-		z.init()
+	for name, z := range c.Zones {
+		z.init(dns.Fqdn(name))
 	}
 }
 
