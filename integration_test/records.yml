@@ -9,6 +9,9 @@ zones:
   example.com:
     ttl: 3600
     records:
+      "":
+        txt:
+          - ["v=spf1 ~all"]
       test:
         host:
           - 192.0.2.1

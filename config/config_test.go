@@ -74,6 +74,17 @@ func TestReadConfig(t *testing.T) {
 				GSS: &GSSConfig{},
 			},
 		},
+		"apex": {
+			want: &Config{
+				Servers: []string{"ns.example.com"},
+				Zones: map[string]*Zone{
+					"example.com": {
+						TTL:     defaultTTL,
+						Records: map[string]*Record{"@": {FQDN: "example.com.", Host: []netip.Addr{netip.MustParseAddr("192.0.2.1")}, TTL: defaultTTL}},
+					},
+				},
+			},
+		},
 		"gss_no_username": {wantErr: true},
 		"gss_no_password": {wantErr: true},
 		"gss_no_domain":   {wantErr: true},

@@ -36,7 +36,11 @@ func (z *Zone) init(zoneName string) {
 		z.TTL = defaultTTL
 	}
 	for name, r := range z.Records {
-		r.FQDN = name + "." + zoneName
+		if name == "@" {
+			r.FQDN = zoneName
+		} else {
+			r.FQDN = name + "." + zoneName
+		}
 		if r.TTL == 0 {
 			r.TTL = z.TTL
 		}

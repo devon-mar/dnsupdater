@@ -1,0 +1,9 @@
+---
+servers:
+  - ns.example.com
+zones:
+  example.com:
+    records:
+      "@":
+        host:
+          - 192.0.2.1
