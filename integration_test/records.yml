@@ -25,3 +25,9 @@ zones:
       test4:
         txt:
           - ["abcdef"]
+      test5:
+        mx:
+          - mx: mx1.example.com
+            preference: 10
+          - mx: mx2.example.com
+            preference: 15

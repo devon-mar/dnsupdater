@@ -26,7 +26,7 @@ type Config struct {
 
 type Zone struct {
 	Records map[string]*Record `yaml:"records"`
-	TTL     uint32             `yaml:"default_ttl"`
+	TTL     uint32             `yaml:"ttl"`
 }
 
 func (z *Zone) init() {

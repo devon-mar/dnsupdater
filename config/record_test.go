@@ -75,6 +75,31 @@ func TestRecords(t *testing.T) {
 				},
 			},
 		},
+		"MX": {
+			r: &Record{Name: "mx", MX: []MXRecord{{Preference: 0, MX: "mail.example.com"}}},
+			want: []dns.RR{
+				&dns.MX{
+					Hdr:        dns.RR_Header{Name: "mx." + testZone, Rrtype: dns.TypeMX, Class: dns.ClassINET},
+					Preference: 0,
+					Mx:         "mail.example.com.",
+				},
+			},
+		},
+		"MX multiple": {
+			r: &Record{Name: "mail", MX: []MXRecord{{Preference: 0, MX: "mx1.example.com"}, {Preference: 10, MX: "mx2.example.com"}}},
+			want: []dns.RR{
+				&dns.MX{
+					Hdr:        dns.RR_Header{Name: "mail." + testZone, Rrtype: dns.TypeMX, Class: dns.ClassINET},
+					Preference: 0,
+					Mx:         "mx1.example.com.",
+				},
+				&dns.MX{
+					Hdr:        dns.RR_Header{Name: "mail." + testZone, Rrtype: dns.TypeMX, Class: dns.ClassINET},
+					Preference: 10,
+					Mx:         "mx2.example.com.",
+				},
+			},
+		},
 		"TXT": {
 			r: &Record{Name: "txt", TXT: [][]string{{"123"}}},
 			want: []dns.RR{
@@ -118,6 +143,7 @@ func TestRecordValidate(t *testing.T) {
 				Name: "test",
 				Host: []netip.Addr{netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("2001:db8::1")},
 				TXT:  [][]string{{"abc"}},
+				MX:   []MXRecord{{Preference: 0, MX: "example.com."}},
 			},
 		},
 		"empty txt": {

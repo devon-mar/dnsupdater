@@ -13,8 +13,14 @@ type Record struct {
 	Name  string
 	Host  []netip.Addr `yaml:"host"`
 	TXT   [][]string   `yaml:"txt"`
-	CNAME string       `yaml:"cname"`
-	TTL   uint32       `yaml:"ttl"`
+	MX    []MXRecord
+	CNAME string `yaml:"cname"`
+	TTL   uint32 `yaml:"ttl"`
+}
+
+type MXRecord struct {
+	Preference uint16 `yaml:"preference"`
+	MX         string `yaml:"mx"`
 }
 
 func (r *Record) Validate() error {
@@ -32,6 +38,12 @@ func (r *Record) Validate() error {
 	if len(r.TXT) > 0 {
 		typeCount++
 		if err := r.validateTXT(); err != nil {
+			return err
+		}
+	}
+	if len(r.MX) > 0 {
+		typeCount++
+		if err := r.validateMX(); err != nil {
 			return err
 		}
 	}
@@ -63,6 +75,22 @@ func (r *Record) validateHost() error {
 			// This should probably never happen.
 			return fmt.Errorf("cannot determine record type for host %q", ip)
 		}
+	}
+	return nil
+}
+
+func (r *Record) validateMX() error {
+	for _, mx := range r.MX {
+		if err := mx.validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mx *MXRecord) validate() error {
+	if mx.MX == "" {
+		return errors.New("MX record must have a MX")
 	}
 	return nil
 }
@@ -121,12 +149,27 @@ func (r *Record) cname(fqdn string) *dns.CNAME {
 	}
 }
 
+func (r *Record) mx(fqdn string) []dns.RR {
+	ret := make([]dns.RR, 0, len(r.MX))
+	for _, mx := range r.MX {
+		ret = append(ret,
+			&dns.MX{
+				Hdr:        r.header(fqdn, dns.TypeMX),
+				Preference: mx.Preference,
+				Mx:         dns.Fqdn(mx.MX),
+			},
+		)
+	}
+	return ret
+}
+
 func (r *Record) Records(zone string) []dns.RR {
 	ret := []dns.RR{}
 
 	fqdn := dns.Fqdn(r.Name + "." + zone)
 	ret = append(ret, r.host(fqdn)...)
 	ret = append(ret, r.txt(fqdn)...)
+	ret = append(ret, r.mx(fqdn)...)
 	if cname := r.cname(fqdn); cname != nil {
 		ret = append(ret, cname)
 	}

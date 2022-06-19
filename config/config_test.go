@@ -1,6 +1,7 @@
 package config
 
 import (
+	"net/netip"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -20,6 +21,26 @@ func TestReadConfig(t *testing.T) {
 					"example.com": {
 						TTL:     defaultTTL,
 						Records: map[string]*Record{"test": {Name: "test", CNAME: "a", TTL: defaultTTL}},
+					},
+				},
+			},
+		},
+		"all_types": {
+			want: &Config{
+				Servers: []string{"ns.example.com"},
+				Zones: map[string]*Zone{
+					"example.com": {
+						TTL: 10,
+						Records: map[string]*Record{
+							"test": {Name: "test", CNAME: "a", TTL: 10},
+							"test2": {
+								Name: "test2",
+								TTL:  10,
+								Host: []netip.Addr{netip.MustParseAddr("192.0.2.1"), netip.MustParseAddr("2001:db8::1")},
+								TXT:  [][]string{{"abc"}},
+								MX:   []MXRecord{{MX: "mx1.example.com", Preference: 10}, {MX: "mx2.example.com", Preference: 15}},
+							},
+						},
 					},
 				},
 			},
@@ -62,6 +83,7 @@ func TestReadConfig(t *testing.T) {
 		"invalid_record":  {wantErr: true},
 		"zone_no_records": {wantErr: true},
 		"extra_key":       {wantErr: true},
+		"mx_invalid":      {wantErr: true},
 	}
 	for file, tc := range tests {
 		t.Run(file, func(t *testing.T) {
