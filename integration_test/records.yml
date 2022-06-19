@@ -27,7 +27,7 @@ zones:
           - ["abcdef"]
       test5:
         mx:
-          - mx: mx1.example.com
+          - mx: mx1.example.net
             preference: 10
-          - mx: mx2.example.com
+          - mx: mx2.example.net
             preference: 15
