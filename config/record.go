@@ -13,9 +13,9 @@ type Record struct {
 	Name  string
 	Host  []netip.Addr `yaml:"host"`
 	TXT   [][]string   `yaml:"txt"`
-	MX    []MXRecord
-	CNAME string `yaml:"cname"`
-	TTL   uint32 `yaml:"ttl"`
+	MX    []MXRecord   `yaml:"mx"`
+	CNAME string       `yaml:"cname"`
+	TTL   uint32       `yaml:"ttl"`
 }
 
 type MXRecord struct {
