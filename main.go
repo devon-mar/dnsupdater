@@ -17,6 +17,7 @@ var (
 	checkCmd   = app.Command("check", "Check the config file.")
 	insertCmd  = app.Command("insert", "Insert records.")
 	batchSize  = insertCmd.Flag("batch", "Insert records in updates of the given size instead of per name.").Int()
+	exitError  = insertCmd.Flag("exit-error", "Stop on the first error when inserting records.").Bool()
 )
 
 func getUpdater(c *config.Config) updater.Updater {
@@ -47,24 +48,27 @@ func main() {
 		log.Infof("Config is valid.")
 	case insertCmd.FullCommand():
 		if *batchSize != 0 {
-			insertBatch(u, c.Zones, *batchSize)
+			exit(insertBatch(u, c.Zones, *batchSize))
 		} else {
-			insert(u, c.Zones)
+			exit(insert(u, c.Zones))
 		}
 	}
 }
 
-func insert(s updater.Updater, zones map[string]*config.Zone) {
+func insert(s updater.Updater, zones map[string]*config.Zone) int {
+	var ret int
 	for zoneName, zone := range zones {
 		log.Infof("Inserting records for zone %q", zoneName)
 		for _, r := range zone.Records {
 			logger := log.WithFields(log.Fields{"fqdn": r.FQDN, "zone": zoneName})
-			insertRecords(s, zoneName, r.Records(), logger)
+			ret += insertRecords(s, zoneName, r.Records(), logger)
 		}
 	}
+	return ret
 }
 
-func insertBatch(s updater.Updater, zones map[string]*config.Zone, batchSize int) {
+func insertBatch(s updater.Updater, zones map[string]*config.Zone, batchSize int) int {
+	var ret int
 	for zoneName, zone := range zones {
 		logger := log.WithField("zone", zoneName)
 		logger.Infof("Insering records")
@@ -73,18 +77,36 @@ func insertBatch(s updater.Updater, zones map[string]*config.Zone, batchSize int
 			queue = append(queue, r.Records()...)
 
 			for len(queue) >= batchSize {
-				insertRecords(s, zoneName, queue[:batchSize], logger)
+				ret += insertRecords(s, zoneName, queue[:batchSize], logger)
 				queue = queue[batchSize:]
 			}
 		}
 		if len(queue) > 0 {
-			insertRecords(s, zoneName, queue, logger)
+			ret += insertRecords(s, zoneName, queue, logger)
 		}
 	}
+	return ret
 }
 
-func insertRecords(s updater.Updater, zone string, records []dns.RR, logger *log.Entry) {
+// if continueOnError is true, os.Exit(1) will be called.
+func insertRecords(s updater.Updater, zone string, records []dns.RR, logger *log.Entry) int {
 	if err := s.Insert(dns.Fqdn(zone), records); err != nil {
-		logger.WithError(err).Error("Error inserting records")
+		var level log.Level
+		if *exitError {
+			level = log.FatalLevel
+		} else {
+			level = log.ErrorLevel
+		}
+		logger.WithError(err).Log(level, "Error inserting records")
+		return 1
 	}
+	return 0
+}
+
+// Exit, limiting the code to a max of 125 (as recommended by os.Exit).
+func exit(code int) {
+	if code > 125 {
+		code = 125
+	}
+	os.Exit(code)
 }
