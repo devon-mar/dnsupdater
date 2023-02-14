@@ -3,7 +3,7 @@ module github.com/devon-mar/dnsupdater
 go 1.18
 
 require (
-	github.com/bodgit/tsig v1.2.1
+	github.com/bodgit/tsig v1.2.2
 	github.com/miekg/dns v1.1.50
 	github.com/sirupsen/logrus v1.9.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
