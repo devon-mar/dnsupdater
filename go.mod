@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/bodgit/tsig v1.2.2
 	github.com/miekg/dns v1.1.55
-	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/yaml.v3 v3.0.1
 )
