@@ -76,7 +76,7 @@ jobs:
           echo "127.0.0.1 ns.example.com kdc.example.com" | sudo tee -a /etc/hosts
 
       - name: Build and start containers
-        run: docker-compose up -d
+        run: docker compose up -d
         working-directory: ./integration_test
         env:
           # Use buildx
