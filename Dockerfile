@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.23.4-alpine as builder
+FROM --platform=$BUILDPLATFORM golang:1.24.0-alpine as builder
 ARG TARGETOS TARGETARCH
 
 WORKDIR /go/src/app
