@@ -1,6 +1,6 @@
 module github.com/devon-mar/dnsupdater
 
-go 1.18
+go 1.22
 
 require (
 	github.com/bodgit/tsig v1.2.2
