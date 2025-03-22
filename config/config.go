@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -97,7 +96,6 @@ func (c *Config) loadEnv() {
 		serverSlice := strings.Split(servers, "\n")
 		for _, s := range serverSlice {
 			trimmed := strings.TrimSpace(s)
-			fmt.Printf("trimmed %q\n", trimmed)
 			if trimmed == "" {
 				continue
 			}
