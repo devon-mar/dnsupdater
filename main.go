@@ -21,6 +21,7 @@ var (
 )
 
 func getUpdater(c *config.Config) updater.Updater {
+	slog.Info("using DNS servers", "servers", c.Servers)
 	u := updater.NewRFC2136(c.Servers)
 	if c.GSS != nil {
 		if err := u.WithGSS(); err != nil {
