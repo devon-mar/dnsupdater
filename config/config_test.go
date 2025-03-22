@@ -125,13 +125,13 @@ func clearEnv() {
 func TestConfigLoadEnvServers(t *testing.T) {
 	clearEnv()
 
-	servers := []string{"ns1.example.com", "ns2.example.com"}
-	os.Setenv(envServers, strings.Join(servers, "\n"))
+	servers := []string{"ns1.example.com:53", " ns2.example.com:53 ", "", " "}
+	t.Setenv(envServers, strings.Join(servers, "\n"))
 
 	c := &Config{}
 	c.loadEnv()
 
-	want := &Config{Servers: servers}
+	want := &Config{Servers: []string{"ns1.example.com:53", "ns2.example.com:53"}}
 
 	if !reflect.DeepEqual(c, want) {
 		t.Errorf("expected %#v, got %#v", c, want)

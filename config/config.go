@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -93,7 +94,15 @@ func (c *Config) init() {
 // Load config from env variables.
 func (c *Config) loadEnv() {
 	if servers := os.Getenv(envServers); servers != "" {
-		c.Servers = strings.Split(servers, "\n")
+		serverSlice := strings.Split(servers, "\n")
+		for _, s := range serverSlice {
+			trimmed := strings.TrimSpace(s)
+			fmt.Printf("trimmed %q\n", trimmed)
+			if trimmed == "" {
+				continue
+			}
+			c.Servers = append(c.Servers, trimmed)
+		}
 	}
 
 	// gss.Validate() will check that the rest are not empty.
