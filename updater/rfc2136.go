@@ -95,7 +95,7 @@ func (u *RFC2136Updater) Insert(zone string, records []dns.RR) error {
 func (u *RFC2136Updater) insert(server string, zone string, records []dns.RR) error {
 	tkey, cleanup, err := u.getTKEY(server)
 	if err != nil {
-		return err
+		return fmt.Errorf("tkey %s: %w", server, err)
 	}
 	if cleanup != nil {
 		defer cleanup()
@@ -112,10 +112,10 @@ func (u *RFC2136Updater) insert(server string, zone string, records []dns.RR) er
 
 	r, _, err := u.dns.Exchange(msg, server)
 	if err != nil {
-		return err
+		return fmt.Errorf("rfc2136: %s: %w", server, err)
 	}
 	if r.Rcode != dns.RcodeSuccess {
-		return fmt.Errorf("got rcode %s", dns.RcodeToString[r.Rcode])
+		return fmt.Errorf("rfc2136: %s: got rcode %s", server, dns.RcodeToString[r.Rcode])
 	}
 	return nil
 }
