@@ -2,7 +2,6 @@ package config
 
 import (
 	"net/netip"
-	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -115,16 +114,7 @@ func TestReadConfig(t *testing.T) {
 	}
 }
 
-func clearEnv() {
-	os.Setenv(envServers, "")
-	os.Setenv(envUsername, "")
-	os.Setenv(envPassword, "")
-	os.Setenv(envDomain, "")
-}
-
 func TestConfigLoadEnvServers(t *testing.T) {
-	clearEnv()
-
 	servers := []string{"ns1.example.com:53", " ns2.example.com:53 ", "", " "}
 	t.Setenv(envServers, strings.Join(servers, "\n"))
 
@@ -139,14 +129,12 @@ func TestConfigLoadEnvServers(t *testing.T) {
 }
 
 func TestConfigLoadEnvGSS(t *testing.T) {
-	clearEnv()
-
 	u := "username"
 	p := "password"
 	d := "domain"
-	os.Setenv(envUsername, u)
-	os.Setenv(envPassword, p)
-	os.Setenv(envDomain, d)
+	t.Setenv(envUsername, u)
+	t.Setenv(envPassword, p)
+	t.Setenv(envDomain, d)
 
 	c := &Config{}
 	c.loadEnv()
