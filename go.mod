@@ -1,10 +1,10 @@
 module github.com/devon-mar/dnsupdater
 
-go 1.22
+go 1.24.0
 
 require (
 	github.com/bodgit/tsig v1.2.2
-	github.com/miekg/dns v1.1.55
+	github.com/miekg/dns v1.1.72
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -26,10 +26,11 @@ require (
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/openshift/gssapi v0.0.0-20161010215902-5fb4217df13b // indirect
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/mod v0.7.0 // indirect
-	golang.org/x/net v0.2.0 // indirect
-	golang.org/x/sys v0.2.0 // indirect
-	golang.org/x/tools v0.3.0 // indirect
+	golang.org/x/crypto v0.46.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
