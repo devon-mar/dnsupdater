@@ -9,6 +9,6 @@ FROM scratch as scratch
 COPY --from=builder /go/src/app/dnsupdater /bin/dnsupdater
 ENTRYPOINT ["/bin/dnsupdater"]
 
-FROM alpine:3.23 as alpine
+FROM alpine:3.24 as alpine
 COPY --from=builder /go/src/app/dnsupdater /bin/dnsupdater
 ENTRYPOINT ["/bin/dnsupdater"]
