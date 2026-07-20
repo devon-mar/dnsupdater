@@ -1,9 +1,16 @@
 ---
+version: "2"
 linters:
   enable:
-    - gofumpt
-    - misspell
     - bodyclose
-    - forbidigo
     - copyloopvar
+    - forbidigo
+    - misspell
     - sloglint
+  settings:
+    errcheck:
+      exclude-functions:
+        - (*os.File).Close
+formatters:
+  enable:
+    - gofumpt

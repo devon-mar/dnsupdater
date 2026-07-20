@@ -44,7 +44,7 @@ func main() {
 		os.Exit(1)
 	}
 	u := getUpdater(c)
-	defer u.Close()
+	defer u.Close() //nolint:errcheck
 
 	switch cmd {
 	case checkCmd.FullCommand():

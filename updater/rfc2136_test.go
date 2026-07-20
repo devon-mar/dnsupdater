@@ -200,7 +200,7 @@ func TestInsert(t *testing.T) {
 func TestNewRFC2136(t *testing.T) {
 	servers := []string{testNS1, testNS2}
 	u := NewRFC2136(servers)
-	defer u.Close()
+	defer u.Close() //nolint:errcheck
 	if u.dns == nil {
 		t.Errorf("expected dns to be non-nil")
 	}
