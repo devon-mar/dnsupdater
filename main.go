@@ -74,7 +74,7 @@ func insertBatch(s updater.Updater, zones map[string]*config.Zone, batchSize int
 	var ret int
 	for zoneName, zone := range zones {
 		logger := slog.With("zone", zoneName)
-		logger.Info("Insering records")
+		logger.Info("Inserting records", "count", len(zone.Records))
 		var queue []dns.RR
 		for _, r := range zone.Records {
 			queue = append(queue, r.Records()...)
